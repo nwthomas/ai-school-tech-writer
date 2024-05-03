@@ -57,7 +57,7 @@ def update_readme_and_create_pr(repo, updated_readme, readme_sha):
     new_branch_name = f'update-readme-{commit_sha[:7]}'
     new_branch = repo.create_git_ref(ref=f'refs/heads/{new_branch_name}', sha=main_branch.commit.sha)
 
-    print(commit_message, updated_readme, readme_sha, branch=new_branch_name)
+    print(commit_message, updated_readme, readme_sha, new_branch_name)
     repo.update_file("README.md", commit_message, updated_readme, readme_sha, branch=new_branch_name)
 
     pr_title = "AI PR: Update README based on recent change"
