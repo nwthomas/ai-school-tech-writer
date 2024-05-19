@@ -35,7 +35,7 @@ def embed_documents(index_name: str) -> None:
         metric="cosine", 
         spec=ServerlessSpec(
             cloud="aws",
-            region="us-west-2"
+            region="us-east-1"
         ),
     )
 
@@ -45,8 +45,18 @@ def embed_documents(index_name: str) -> None:
         index_name=index_name
     )
 
-def get_embeddings_for_diffs(diffs: List[str]) -> str:
-    return ""
+def get_embeddings_for_diffs(index_name: str, diffs: List[str]) -> List[str]:
+    embeddings = OpenAIEmbeddings(model=EMBEDDING_MODEL)
+    document_vectorstore = PineconeVectorStore(
+        index_name=index_name,
+        embedding=embeddings
+    )
+
+    retriever = document_vectorstore.as_retriever()
+
+    json_pull_request_diffs = json.dumps(pull_request_diffs)
+
+    return retriever.invoke(json_pull_request_diffs)
 
 def delete_embeddings_for_codebase(index_name: List[str]) -> str:
     """Deletes an index from the Pinecone account"""
