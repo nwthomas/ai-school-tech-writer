@@ -33,7 +33,8 @@ def main():
     json_pull_request_diffs = json.dumps(pull_request_diffs)
 
     # Do embeddings on codebase
-    current_index_name = f"{BRANCH_NAME}-{random.randint(0, 10000)}"
+    current_index_name = "autopr"
+    print(current_index_name)
     embed_documents(current_index_name)
 
     # Search embeddings
