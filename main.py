@@ -57,4 +57,4 @@ def main():
     update_pr_description(repo, PULL_REQUEST_NUMBER, pr_description)
 
 if __name__ == '__main__':
-    load_documents()
+    main()

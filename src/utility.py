@@ -1,6 +1,8 @@
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.output_parsers.string import StrOutputParser
 from langchain_community.document_loaders import DirectoryLoader
 from langchain_pinecone import PineconeVectorStore
+from langchain_openai import OpenAIEmbeddings
 from langchain_openai import ChatOpenAI
 from .constants import *
 from typing import List
@@ -24,7 +26,7 @@ def embed_documents(index_name: str) -> None:
     """Embeds chunked documents in Pinecone's vector store after creating a new index"""
     raw_documents = load_documents()
     split_documents = get_split_documents(raw_documents)
-    embeddings = OpenAIEmbeddings(model=EMBEDDING_MODEL)
+    embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY, model=EMBEDDING_MODEL)
 
     pincone.init(api_key=PINECONE_API_KEY)
     pinecone.create_index(index_name, dimension=3072)
