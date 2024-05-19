@@ -55,7 +55,7 @@ def get_embeddings_for_diffs(index_name: str, diffs: List[str]) -> List[str]:
 
     retriever = document_vectorstore.as_retriever()
 
-    json_pull_request_diffs = json.dumps(pull_request_diffs)
+    json_pull_request_diffs = json.dumps(diffs)
 
     return retriever.invoke(json_pull_request_diffs)
 
