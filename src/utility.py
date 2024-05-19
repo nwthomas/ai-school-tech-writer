@@ -28,7 +28,7 @@ def embed_documents(index_name: str) -> None:
     split_documents = get_split_documents(raw_documents)
     embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY, model=EMBEDDING_MODEL)
 
-    pincone.init(api_key=PINECONE_API_KEY)
+    pinecone.init(api_key=PINECONE_API_KEY)
     pinecone.create_index(index_name, dimension=3072)
 
     PineconeVectorStore.from_documents(
@@ -41,8 +41,8 @@ def get_embeddings_for_diffs(diffs: List[str]) -> str:
     return ""
 
 def delete_embeddings_for_codebase(index_name: List[str]) -> str:
-    """Deletes an index from the Pincone account"""
-    pincone.init(api_key=PINECONE_API_KEY)
+    """Deletes an index from the Pinecone account"""
+    pinecone.init(api_key=PINECONE_API_KEY)
     pinecone.delete_index(index_name)
 
 def format_data_for_prompt(diffs, commit_messages, codebase_context, pull_request_description_template):
