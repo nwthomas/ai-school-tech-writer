@@ -3,7 +3,7 @@ name: Generate PR Description
 on:
   push:
     branches:
-      - "*"
+      - "nathanthomas/technical-writer"
 
 jobs:
   generate-pull-request-description:
