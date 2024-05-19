@@ -8,6 +8,7 @@ from langchain_openai import ChatOpenAI
 from .constants import *
 from typing import List
 import base64
+import json
 import os
 
 def load_documents() -> List[str]:
