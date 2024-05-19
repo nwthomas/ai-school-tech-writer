@@ -2,11 +2,11 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.output_parsers.string import StrOutputParser
 from langchain_community.document_loaders import DirectoryLoader
 from langchain_pinecone import PineconeVectorStore
+from pinecone import Pincone, ServerlessSpec
 from langchain_openai import OpenAIEmbeddings
 from langchain_openai import ChatOpenAI
 from .constants import *
 from typing import List
-import pinecone
 import base64
 import os
 
@@ -28,8 +28,16 @@ def embed_documents(index_name: str) -> None:
     split_documents = get_split_documents(raw_documents)
     embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY, model=EMBEDDING_MODEL)
 
-    pinecone.init(api_key=PINECONE_API_KEY)
-    pinecone.create_index(index_name, dimension=3072)
+    pc = Pinecone(api_key=PINECONE_API_KEY)
+    pc.create_index(
+        name=index_name,
+        dimension=3072,
+        metric="cosine", 
+        spec=ServerlessSpec(
+            cloud="aws",
+            region="us-west-2"
+        ),
+    )
 
     PineconeVectorStore.from_documents(
         documents=split_documents,
@@ -42,8 +50,8 @@ def get_embeddings_for_diffs(diffs: List[str]) -> str:
 
 def delete_embeddings_for_codebase(index_name: List[str]) -> str:
     """Deletes an index from the Pinecone account"""
-    pinecone.init(api_key=PINECONE_API_KEY)
-    pinecone.delete_index(index_name)
+    pc = Pinecone(api_key=PINECONE_API_KEY)
+    pc.delete_index(index_name)
 
 def format_data_for_prompt(diffs, commit_messages, codebase_context, pull_request_description_template):
     # Combine the changes into a string with clear delineation.
