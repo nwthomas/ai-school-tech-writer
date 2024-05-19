@@ -5,6 +5,7 @@ from langchain_pinecone import PineconeVectorStore
 from pinecone import Pinecone, ServerlessSpec
 from langchain_openai import OpenAIEmbeddings
 from langchain_openai import ChatOpenAI
+from github import Github
 from .constants import *
 from typing import List
 import base64
