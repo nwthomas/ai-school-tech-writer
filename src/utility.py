@@ -5,9 +5,8 @@ from langchain_pinecone import PineconeVectorStore
 from pinecone import Pinecone, ServerlessSpec
 from langchain_openai import OpenAIEmbeddings
 from langchain_openai import ChatOpenAI
-from github import Github
 from .constants import *
-from typing import List
+from typing import Any, List
 import base64
 import json
 import os
@@ -115,7 +114,7 @@ def generate_pr_description(prompt: str) -> str:
     except Exception as e:
         print(f'Error making LLM call: {e}')
 
-def update_pr_description(repo: Github.Repository.Repository, pull_request_number: int, pull_request_description: str) -> None:
+def update_pr_description(repo: Any, pull_request_number: int, pull_request_description: str) -> None:
     """Updates a given pull request at a given repo with a new description"""
     pr = repo.get_pull(pull_request_number)
     pr.edit(body=pull_request_description)
