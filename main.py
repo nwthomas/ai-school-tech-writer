@@ -31,8 +31,14 @@ def main():
     commit_messages = [commit.commit.message for commit in pull_request.get_commits()]
     json_pull_request_diffs = json.dumps(pull_request_diffs)
 
-    # TODO: Get context from vector store after storing codebase
-    codebase_context = ""
+    # Do embeddings on codebase
+    store_codebase_embeddings()
+
+    # Search embeddings
+    codebase_context = get_embeddings_for_diffs()
+
+    # Delete index and codebase embeddings
+    delete_embeddings_for_codebase()
 
     # Build prompt
     prompt = format_data_for_prompt(
@@ -50,4 +56,4 @@ def main():
     update_pr_description(repo, PULL_REQUEST_NUMBER, pr_description)
 
 if __name__ == '__main__':
-    main()
+    load_documents()

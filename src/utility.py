@@ -1,10 +1,39 @@
 from langchain_core.output_parsers.string import StrOutputParser
+from langchain_community.document_loaders import DirectoryLoader
 from langchain_openai import ChatOpenAI
 from .constants import *
+from typing import List
 import base64
 import os
 
-def store_codebase_embeddings():
+def load_documents() -> List[str]:
+    """Loads PDF documents to be used in embeddings in a vector store"""
+    loader = DirectoryLoader("./", glob="*.*")
+    raw_documents = loader.load()
+    return raw_documents
+
+def get_split_documents(raw_documents: List[str]) -> List[str]:
+    """Chunks PDF documents to be used in embeddings in a vector store"""
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
+    split_documents = text_splitter.split_documents(raw_documents)
+    return split_documents
+
+def embed_documents(custom_index: str) -> None:
+    """Embeds chunked documents in Pinecone's vector store"""
+    raw_documents = load_documents()
+    split_documents = get_split_documents(raw_documents)
+
+    embeddings = OpenAIEmbeddings(model=EMBEDDING_MODEL)
+    PineconeVectorStore.from_documents(
+        documents=split_documents,
+        embedding=embeddings,
+        index_name=PINECONE_INDEX
+    )
+
+def get_embeddings_for_diffs(diffs: List[str]) -> str:
+    return ""
+
+def delete_embeddings_for_codebase(diffs: List[str]) -> str:
     pass
 
 def format_data_for_prompt(diffs, commit_messages, codebase_context, pull_request_description_template):
@@ -34,7 +63,7 @@ def format_data_for_prompt(diffs, commit_messages, codebase_context, pull_reques
 
     return prompt
 
-def generate_pr_description(prompt):
+def generate_pr_description(prompt: str) -> str:
     # Initialize model
     client = ChatOpenAI(api_key=OPENAI_API_KEY, model="gpt-4o")
 
@@ -52,7 +81,7 @@ def generate_pr_description(prompt):
     except Exception as e:
         print(f'Error making LLM call: {e}')
 
-def update_pr_description(repo, pull_request_number, pull_request_description):
+def update_pr_description(repo, pull_request_number: int, pull_request_description: str) -> None:
     # Get the repo pull request
     pr = repo.get_pull(pull_request_number)
 
