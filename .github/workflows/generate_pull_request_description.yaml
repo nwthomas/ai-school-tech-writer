@@ -27,21 +27,22 @@ jobs:
       - name: Get PR Info
         id: pr_info
         run: |
-          pr_num=$(jq -r '.pull_request.number' "$GITHUB_EVENT_PATH")
+          pr_num=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+          echo "PR number: $PR_NUMBER"
           commit_sha=$(jq -r '.pull_request.merge_commit_sha' "$GITHUB_EVENT_PATH")
           echo "pull_request_number=$pr_num" >> $GITHUB_ENV
           echo "commit_sha=$commit_sha" >> $GITHUB_ENV
 
-      - name: Generate PR Description
-        env:
-          COMMIT_SHA: ${{ env.commit_sha }}
-          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          PINECONE_API_KEY: ${{ secrets.PINECONE_API_KEY }}
-          PR_NUMBER: ${{ env.pull_request_number }}
-          REPO_PATH: ${{ github.repository }}
-        run: python main.py
+      # - name: Generate PR Description
+      #   env:
+      #     COMMIT_SHA: ${{ env.commit_sha }}
+      #     GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
+      #     OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      #     PINECONE_API_KEY: ${{ secrets.PINECONE_API_KEY }}
+      #     PR_NUMBER: ${{ env.pull_request_number }}
+      #     REPO_PATH: ${{ github.repository }}
+      #   run: python main.py
 
-      # - name: Enable Debug Logging
-      #   run: |
-      #     echo "ACTIONS_STEP_DEBUG=true" >> $GITHUB_ENV
+      - name: Enable Debug Logging
+        run: |
+          echo "ACTIONS_STEP_DEBUG=true" >> $GITHUB_ENV
