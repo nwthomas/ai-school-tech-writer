@@ -1,5 +1,5 @@
 from github import Github
-from constants import *
+from src.constants import *
 from utility import *
 import json
 import sys
