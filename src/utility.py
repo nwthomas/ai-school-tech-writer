@@ -2,7 +2,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.output_parsers.string import StrOutputParser
 from langchain_community.document_loaders import DirectoryLoader
 from langchain_pinecone import PineconeVectorStore
-from pinecone import Pincone, ServerlessSpec
+from pinecone import Pinecone, ServerlessSpec
 from langchain_openai import OpenAIEmbeddings
 from langchain_openai import ChatOpenAI
 from .constants import *
