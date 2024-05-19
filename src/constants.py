@@ -1,6 +1,7 @@
 import os
 
 BRANCH_NAME = os.getenv("BRANCH_NAME", "")
+EMBEDDING_MODEL="text-embedding-3-large"
 GITHUB_API_KEY = os.getenv("GITHUB_TOKEN", "")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY", "")

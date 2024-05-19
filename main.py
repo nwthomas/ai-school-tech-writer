@@ -1,6 +1,7 @@
 from github import Github
 from src.constants import *
 from src.utility import *
+import random
 import json
 import sys
 
@@ -32,13 +33,14 @@ def main():
     json_pull_request_diffs = json.dumps(pull_request_diffs)
 
     # Do embeddings on codebase
-    store_codebase_embeddings()
+    current_index_name = f"{BRANCH_NAME}-{random.randint(0, 10000)}"
+    embed_documents(current_index_name)
 
     # Search embeddings
     codebase_context = get_embeddings_for_diffs()
 
     # Delete index and codebase embeddings
-    delete_embeddings_for_codebase()
+    # delete_embeddings_for_codebase(current_index_name)
 
     # Build prompt
     prompt = format_data_for_prompt(
@@ -50,7 +52,6 @@ def main():
 
     # Call model for PR description
     pr_description = generate_pr_description(prompt)
-    print(pr_description)
 
     # Update PR description
     update_pr_description(repo, PULL_REQUEST_NUMBER, pr_description)

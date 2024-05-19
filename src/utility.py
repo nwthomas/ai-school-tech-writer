@@ -1,8 +1,10 @@
 from langchain_core.output_parsers.string import StrOutputParser
 from langchain_community.document_loaders import DirectoryLoader
+from langchain_pinecone import PineconeVectorStore
 from langchain_openai import ChatOpenAI
 from .constants import *
 from typing import List
+import pinecone
 import base64
 import os
 
@@ -13,28 +15,33 @@ def load_documents() -> List[str]:
     return raw_documents
 
 def get_split_documents(raw_documents: List[str]) -> List[str]:
-    """Chunks PDF documents to be used in embeddings in a vector store"""
+    """Chunks codebase documents to be used in embeddings in a vector store"""
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
     split_documents = text_splitter.split_documents(raw_documents)
     return split_documents
 
-def embed_documents(custom_index: str) -> None:
-    """Embeds chunked documents in Pinecone's vector store"""
+def embed_documents(index_name: str) -> None:
+    """Embeds chunked documents in Pinecone's vector store after creating a new index"""
     raw_documents = load_documents()
     split_documents = get_split_documents(raw_documents)
-
     embeddings = OpenAIEmbeddings(model=EMBEDDING_MODEL)
+
+    pincone.init(api_key=PINECONE_API_KEY)
+    pinecone.create_index(index_name, dimension=3072)
+
     PineconeVectorStore.from_documents(
         documents=split_documents,
         embedding=embeddings,
-        index_name=PINECONE_INDEX
+        index_name=index_name
     )
 
 def get_embeddings_for_diffs(diffs: List[str]) -> str:
     return ""
 
-def delete_embeddings_for_codebase(diffs: List[str]) -> str:
-    pass
+def delete_embeddings_for_codebase(index_name: List[str]) -> str:
+    """Deletes an index from the Pincone account"""
+    pincone.init(api_key=PINECONE_API_KEY)
+    pinecone.delete_index(index_name)
 
 def format_data_for_prompt(diffs, commit_messages, codebase_context, pull_request_description_template):
     # Combine the changes into a string with clear delineation.
