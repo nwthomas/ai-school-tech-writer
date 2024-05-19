@@ -40,7 +40,7 @@ def main():
     codebase_context = get_embeddings_for_diffs(current_index_name, pull_request_diffs)
 
     # Delete index and codebase embeddings
-    # delete_embeddings_for_codebase(current_index_name)
+    delete_embeddings_for_codebase(current_index_name)
 
     # Build prompt
     prompt = format_data_for_prompt(
