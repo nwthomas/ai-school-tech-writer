@@ -26,9 +26,9 @@ def get_split_documents(raw_documents: List[str]) -> List[str]:
 
     return split_documents
 
-def embed_documents(index_name: str) -> None:
+def embed_documents(repo: Any, index_name: str) -> None:
     """Embeds chunked documents in Pinecone's vector store after creating a new index"""
-    raw_documents = load_documents()
+    raw_documents = load_documents(repo)
     split_documents = get_split_documents(raw_documents)
     embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY, model=EMBEDDING_MODEL)
 
