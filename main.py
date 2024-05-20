@@ -34,11 +34,10 @@ def main():
 
     # Do embeddings on codebase
     current_index_name = "autopr"
-    embed_documents(current_index_name)
+    embed_documents(repo, current_index_name)
 
     # Search embeddings
     codebase_context = get_embeddings_for_diffs(current_index_name, pull_request_diffs)
-    print(codebase_context)
 
     # Delete index and codebase embeddings
     delete_embeddings_for_codebase(current_index_name)
