@@ -11,8 +11,9 @@ import base64
 import json
 import os
 
-def load_documents() -> List[str]:
+def load_documents(repo: Any) -> List[str]:
     """Loads PDF documents to be used in embeddings in a vector store"""
+    repo.get_branch("main")
     loader = DirectoryLoader("./", glob="*.*")
     raw_documents = loader.load()
 
@@ -100,19 +101,16 @@ def generate_pr_description(prompt: str) -> str:
     """Uses a model (currently OpenAI) to generate a new pull request description"""
     client = ChatOpenAI(api_key=OPENAI_API_KEY, model="gpt-4o")
 
-    try:
-        messages = [
-            {"role": "system", "content": "You are an expert code reviewer tasked with summarizing all changes in a pull request and writing an incredible description for it."},
-            {"role": "user", "content": prompt}
-        ]
+    messages = [
+        {"role": "system", "content": "You are an expert code reviewer tasked with summarizing all changes in a pull request and writing an incredible description for it."},
+        {"role": "user", "content": prompt}
+    ]
 
-        response = client.invoke(input=messages)
-        parser = StrOutputParser()
-        content = parser.invoke(input=response)
+    response = client.invoke(input=messages)
+    parser = StrOutputParser()
+    content = parser.invoke(input=response)
 
-        return content
-    except Exception as e:
-        print(f'Error making LLM call: {e}')
+    return content
 
 def update_pr_description(repo: Any, pull_request_number: int, pull_request_description: str) -> None:
     """Updates a given pull request at a given repo with a new description"""
