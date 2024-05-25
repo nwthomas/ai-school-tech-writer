@@ -5,15 +5,35 @@ from langchain_pinecone import PineconeVectorStore
 from pinecone import Pinecone, ServerlessSpec
 from langchain_openai import OpenAIEmbeddings
 from langchain_openai import ChatOpenAI
+from langchain.tools import tool
+from github import Github
 from .constants import *
 from typing import Any, List
 import base64
 import json
 import os
 
+# Initialize PyGithub, fetch repo, and fetch pull request
+g = Github(GITHUB_API_KEY)
+repo = g.get_repo(REPO_PATH)
+pull_request = repo.get_pull(PULL_REQUEST_NUMBER)
+
+@tool
+def leave_code_review_comment(comment: str, filename: str, line: int) -> None:
+    """
+    Leave a code review comment on a pull request at a specified file and line.
+
+    Parameters:
+    comment (str): The comment to leave as a code review comment
+    filename (str): The filename to leave a code review comment on
+    line (int): The line in the file to leave a code review comment on
+    """
+    print("TRYING TO LEAVE CODE COMMENT", comment, filename, line)
+    pull_request.create_review_comment(response.comment, diff.filename, response.line)
+
 def load_documents(repo: Any) -> List[str]:
     """Loads PDF documents to be used in embeddings in a vector store"""
-    repo.get_branch("main")
+    repo.get_branch(BASE_BRANCH)
     loader = DirectoryLoader("./", glob="*.*")
     raw_documents = loader.load()
 
@@ -68,7 +88,7 @@ def delete_embeddings_for_codebase(index_name: List[str]) -> str:
     pc = Pinecone(api_key=PINECONE_API_KEY)
     pc.delete_index(index_name)
 
-def format_data_for_prompt(diffs, commit_messages, codebase_context, pull_request_description_template):
+def format_data_for_description_prompt(diffs, commit_messages, codebase_context, pull_request_description_template):
     """Formats contextual data and generates the prompt with it, including for system data"""
 
     # Combine the changes into a string with clear delineation.
@@ -116,3 +136,34 @@ def update_pr_description(repo: Any, pull_request_number: int, pull_request_desc
     """Updates a given pull request at a given repo with a new description"""
     pr = repo.get_pull(pull_request_number)
     pr.edit(body=pull_request_description)
+
+def format_data_for_code_review_prompt(diff, codebase_context) -> List[str]:
+    # Construct the prompt with clear instructions for the LLM
+    prompt = (
+        "Here's some code I wrote:\n"
+        f"{diff}\n"
+        "Here's context on it from existing files in the codebase:"
+        f"{codebase_context}"
+        """
+        You are an expert software engineer and are known on your team for being a thorough and precise code reviewer. Review the code diff I just gave you along with the codebase context. If you spot code that needs to change or improve in some way, return comments on it in this format:
+
+        [
+            {'content': 'Consider using a more descriptive name for the job and steps to make the workflow easier to understand and maintain.', 'line': 42},
+            {'content': 'Consider adding error handling for the GitHub API calls to handle potential failures gracefully.', 'line': 3},
+        ]
+
+        Always return a list at root. Nest dictionaries inside it with keys of content (for your comment) and line (for the line to leave the comment on - you can get this line from the code review diffs). Use double quotes and never use single quotes for enclosing keys or values in the dictionaries.
+
+        Only return JSON like I've described. 
+        
+        Do not EVER return standalone markdown text or any text content outside of the format I described or else really bad things will happen.
+        
+        Return comments (one or multiple) in a list like the example. Keep the comments short with no yapping. Try to eliminate whole classes of errors, suggest cleaner code patterns, and predict issues that may happen if your teammate's code lands in production.\n
+        """
+    )
+
+    return prompt
+
+def run_code_review_for_diff(prompt):
+    llm = ChatOpenAI(api_key=OPENAI_API_KEY, model="gpt-4o")
+    return llm.invoke(prompt)
