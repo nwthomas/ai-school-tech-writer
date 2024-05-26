@@ -22,52 +22,54 @@ def generate_code_review():
         for file in pull_request.get_files()
     ]
 
-    # Dynamic vector database index name
-    random_number = random.randint(1, 100000000)
-    current_index_name = f"auto-code-review-{random_number}"
-    embed_documents(repo, current_index_name)
+    print(pull_request_diffs)
 
-    # Search embeddings
-    for diff in pull_request_diffs:
-        codebase_context = get_embeddings_for_diffs(current_index_name, [diff])
+    # # Dynamic vector database index name
+    # random_number = random.randint(1, 100000000)
+    # current_index_name = f"auto-code-review-{random_number}"
+    # embed_documents(repo, current_index_name)
 
-        # Prompt LLM with context + diff to decide if a comment is necessary
-        prompt = format_data_for_code_review_prompt(
-            diff,
-            codebase_context,
-        )
+    # # Search embeddings
+    # for diff in pull_request_diffs:
+    #     codebase_context = get_embeddings_for_diffs(current_index_name, [diff])
 
-        result = run_code_review_for_diff(prompt)
+    #     # Prompt LLM with context + diff to decide if a comment is necessary
+    #     prompt = format_data_for_code_review_prompt(
+    #         diff,
+    #         codebase_context,
+    #     )
 
-        schema = {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "content": { "type": "string" },
-                    "line": { "type": "integer" },
-                },
-                "required": ["content", "line"],
-            },
-        }
+    #     result = run_code_review_for_diff(prompt)
 
-        print(diff["filename"], len(codebase_context))
+    #     schema = {
+    #         "type": "array",
+    #         "items": {
+    #             "type": "object",
+    #             "properties": {
+    #                 "content": { "type": "string" },
+    #                 "line": { "type": "integer" },
+    #             },
+    #             "required": ["content", "line"],
+    #         },
+    #     }
 
-        try:
-            json_data = json.loads(result.content)
-            jsonschema.validate(instance=json_data, schema=schema)
-            print("NEW COMMENT SECTION\n\n\n" + result.content + "\n\n\n")
-            # pull_request.create_review_comment(json_data.content, diff.filename, json_data.line)
+    #     print(diff["filename"], len(codebase_context))
+
+    #     try:
+    #         json_data = json.loads(result.content)
+    #         jsonschema.validate(instance=json_data, schema=schema)
+    #         print("NEW COMMENT SECTION\n\n\n" + result.content + "\n\n\n")
+    #         # pull_request.create_review_comment(json_data.content, diff.filename, json_data.line)
         
-        except jsonschema.ValidationError as e:
-            print("JSON validation error:", e.message, result.content)
-        except json.decoder.JSONDecodeError as e:
-            print("Invalid JSON format:", e, result.content)
-        except Exception as e:
-            print("An error occurred:", e, result.content)
+    #     except jsonschema.ValidationError as e:
+    #         print("JSON validation error:", e.message, result.content)
+    #     except json.decoder.JSONDecodeError as e:
+    #         print("Invalid JSON format:", e, result.content)
+    #     except Exception as e:
+    #         print("An error occurred:", e, result.content)
 
-    # Delete index and codebase embeddings in vector database
-    delete_embeddings_for_codebase(current_index_name)
+    # # Delete index and codebase embeddings in vector database
+    # delete_embeddings_for_codebase(current_index_name)
 
 if __name__ == '__main__':
     generate_code_review()

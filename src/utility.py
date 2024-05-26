@@ -156,7 +156,7 @@ def format_data_for_code_review_prompt(diff, codebase_context) -> List[str]:
 
         Only return JSON like I've described. 
         
-        Do not EVER return standalone markdown text or any text content outside of the format I described or else really bad things will happen.
+        Do not EVER return standalone markdown text or any text content. For example, never return a bulleted list or markdown headers in a long description file
         
         Return comments (one or multiple) in a list like the example. Keep the comments short with no yapping. Try to eliminate whole classes of errors, suggest cleaner code patterns, and predict issues that may happen if your teammate's code lands in production.\n
         """
