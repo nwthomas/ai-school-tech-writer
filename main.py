@@ -43,7 +43,7 @@ def main():
     delete_embeddings_for_codebase(current_index_name)
 
     # Build prompt
-    prompt = format_data_for_prompt(
+    prompt = format_data_for_description_prompt(
         pull_request_diffs,
         commit_messages,
         codebase_context,

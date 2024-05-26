@@ -1,12 +1,12 @@
-name: Generate PR Description
+name: Generate Code Review
 
 on:
   pull_request:
     types: [opened, synchronize]
 
 jobs:
-  generate-pull-request-description:
-    name: Write PR Description
+  generate-code-review:
+    name: Generate Code Review
     runs-on: ubuntu-latest
 
     steps:
@@ -31,7 +31,7 @@ jobs:
           pr_num=${{ github.event.pull_request.number }}
           echo "pull_request_number=$pr_num" >> $GITHUB_ENV
 
-      - name: Generate PR Description
+      - name: Generate Code Review
         env:
           CURRENT_BRANCH: ${{ github.event.pull_request.head.ref }}
           BASE_BRANCH: ${{ github.event.pull_request.base.ref }}
@@ -40,4 +40,4 @@ jobs:
           PINECONE_API_KEY: ${{ secrets.PINECONE_API_KEY }}
           PR_NUMBER: ${{ env.pull_request_number }}
           REPO_PATH: ${{ github.repository }}
-        run: python main.py
+        run: python code_review.py
